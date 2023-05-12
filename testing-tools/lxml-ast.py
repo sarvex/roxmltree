@@ -9,10 +9,7 @@ def escape_text(text):
 
 
 def split_qname(name):
-    if name[0] == '{':
-        return name[1:].split('}')
-    else:
-        return [None, name]
+    return name[1:].split('}') if name[0] == '{' else [None, name]
 
 
 def print_ind(depth, *args, **kwargs):
@@ -23,27 +20,27 @@ def print_ind(depth, *args, **kwargs):
 
 def print_node(node, depth):
     if node.tag is etree.Comment:
-        print_ind(depth, '- Comment: "{}"'.format(escape_text(node.text)))
+        print_ind(depth, f'- Comment: "{escape_text(node.text)}"')
 
         if node.tail:
-            print_ind(depth, '- Text: "{}"'.format(escape_text(node.tail)))
+            print_ind(depth, f'- Text: "{escape_text(node.tail)}"')
 
         return
 
     if node.tag is etree.PI:
         print_ind(depth, '- PI:')
-        print_ind(depth + 2, 'target: "{}"'.format(node.target))
-        print_ind(depth + 2, 'value: "{}"'.format(escape_text(node.text)))
+        print_ind(depth + 2, f'target: "{node.target}"')
+        print_ind(depth + 2, f'value: "{escape_text(node.text)}"')
 
         if node.tail:
-            print_ind(depth, '- Text: "{}"'.format(escape_text(node.tail)))
+            print_ind(depth, f'- Text: "{escape_text(node.tail)}"')
 
         return
 
     print_ind(depth, '- Element:')
     if node.tag[0] == '{':
         uri, tag = split_qname(node.tag)
-        print_ind(depth + 2, 'tag_name: {}@{}'.format(tag, uri))
+        print_ind(depth + 2, f'tag_name: {tag}@{uri}')
     else:
         print_ind(depth + 2, 'tag_name:', node.tag)
 
@@ -53,14 +50,14 @@ def print_node(node, depth):
         for name, value in node.attrib.items():
             uri, tag = split_qname(name)
             if uri:
-                attrs.append([tag + '@' + uri, value])
+                attrs.append([f'{tag}@{uri}', value])
             else:
                 attrs.append([tag, value])
 
         attrs = sorted(attrs, key=lambda x: x[0])
 
         for name, value in attrs:
-            print_ind(depth + 3, '{}: "{}"'.format(name, escape_text(value)))
+            print_ind(depth + 3, f'{name}: "{escape_text(value)}"')
 
     if node.nsmap:
         print_ind(depth + 2, 'namespaces:')
@@ -79,22 +76,22 @@ def print_node(node, depth):
         ns_list = sorted(ns_list, key=lambda x: x[0])
 
         for name, value in ns_list:
-            print_ind(depth + 3, '{}: {}'.format(name, value))
+            print_ind(depth + 3, f'{name}: {value}')
 
     if len(node):
         print_ind(depth + 2, 'children:')
 
         if node.text:
-            print_ind(depth + 3, '- Text: "{}"'.format(escape_text(node.text)))
+            print_ind(depth + 3, f'- Text: "{escape_text(node.text)}"')
 
         for child in node:
             print_node(child, depth + 3)
     elif node.text:
         print_ind(depth + 2, 'children:')
-        print_ind(depth + 3, '- Text: "{}"'.format(escape_text(node.text)))
+        print_ind(depth + 3, f'- Text: "{escape_text(node.text)}"')
 
     if node.tail:
-        print_ind(depth, '- Text: "{}"'.format(escape_text(node.tail)))
+        print_ind(depth, f'- Text: "{escape_text(node.tail)}"')
 
 
 tree = etree.parse(sys.argv[1])
